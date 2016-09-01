@@ -1,0 +1,28 @@
+{
+  "name": "niddar-pagination-generator",
+  "version": "1.0.2",
+  "description": "This repository contains a npm module with a very practical approach to generator pagination.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webreinvent/niddar-pagination-generator.git"
+  },
+  "keywords": [
+    "pagination",
+    "node",
+    "pagination",
+    "npm",
+    "pagination",
+    "paginator"
+  ],
+  "author": "Pradeep Kumar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/webreinvent/niddar-pagination-generator/issues"
+  },
+  "homepage": "https://github.com/webreinvent/niddar-pagination-generator#readme",
+  "dependencies": {}
+}
