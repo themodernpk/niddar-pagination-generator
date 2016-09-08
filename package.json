@@ -1,6 +1,6 @@
 {
   "name": "niddar-pagination-generator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This repository contains a npm module with a very practical approach to generator pagination.",
   "main": "index.js",
   "scripts": {

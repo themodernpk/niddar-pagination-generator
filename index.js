@@ -8,21 +8,15 @@ function Pagination(config) {
     this.config.template = config.template || 'bootstrap';
     this.config.pageParameter = config.pageParameter || 'page';
     this.config.first = isUndefined(config.first) ? 1 : config.first;
-    this.config.displayPages = config.displayPages || 5;
+    this.config.displayPages = config.displayPages || 7;
     this.config.firstLabel = config.firstLabel || '«';
     this.config.previousLabel = config.previousLabel || '‹';
     this.config.middleLabel = config.middleLabel || '...';
     this.config.nextLabel = config.nextLabel || '›';
     this.config.lastLabel = config.lastLabel || '»';
-    this.config = this.getConfig();
     this.offset = this.getOffset();
     this.totalPages = this.getTotalPages();
-    this.next = this.getNext();
-    this.firstHalf = this.getFirstHalf();
-    this.mid = this.getMiddle();
-    this.secondHalf = this.getSecondHalf();
-    this.previous = this.getPrevious();
-    this.last = this.getLast();
+    this.range = this.getRange();
     this.generator = this.getGenerator();
     this.template = this.getTemplate();
 }
@@ -59,101 +53,129 @@ Pagination.prototype.getTotalPages = function () {
     return Math.ceil(this.config.totalRecords / this.config.recordsPerPage);
 }
 //----------------------------------
-Pagination.prototype.getNext = function () {
-    var next = this.config.currentPage + 1;
-    if (next < this.getTotalPages()) {
-        return next;
-    } else {
-        return false;
+Pagination.prototype.getPrevious = function () {
+    var data;
+    if (this.config.currentPage != 1) {
+        data = this.config.currentPage - 1;
     }
+    return data;
 }
 //----------------------------------
-Pagination.prototype.getMiddle = function () {
-    return Math.ceil(this.getTotalPages() / 2);
+Pagination.prototype.getNext = function () {
+    var data;
+    if (this.config.currentPage < this.getTotalPages()) {
+        data = this.config.currentPage + 1;
+    }
+    return data;
 }
 //----------------------------------
 Pagination.prototype.getFirstHalf = function () {
-    var result = {
-        start: this.config.first,
-        end: this.getMiddle() - 1
-    }
-    result.pages = [];
-    for (var i = 0; i < result.end; i++) {
-        if (i > this.getOffset()) {
-            break;
-        }
-        result.pages[i] = {
-            page: i + 1,
-            url: this.buildUrl(i + 1)
-        };
-    }
-    return result.pages;
-}
-//----------------------------------
-Pagination.prototype.getSecondHalf = function () {
-    var result = {
-        start: this.getMiddle() + 1,
-        end: this.getTotalPages()
-    }
-    var range = result.end - result.start;
-    result.pages = [];
-    for (var i = 0; i <= this.getOffset(); i++) {
-        var page = result.end - (this.getOffset() - i);
-        result.pages[i] = {
-            page: page,
-            url: this.buildUrl(page)
-        };
-    }
-    return result.pages;
-}
-//----------------------------------
-Pagination.prototype.getPrevious = function () {
-    var previous = this.config.currentPage - 1;
-    if (previous > 0) {
-        return previous;
+    var data = [];
+    var i = null;
+    var offset = this.getOffset();
+    if (this.config.currentPage <= this.getOffset()) {
+        var start = this.config.first;
+        var end = this.getOffset();
     } else {
-        return false;
+        var start = this.config.currentPage - offset;
+        var end = start + this.getOffset();
     }
+    var y = 0;
+    for (i = start; i < end; i++) {
+        data[y] = i;
+        y++;
+    }
+    return data;
 }
 //----------------------------------
-Pagination.prototype.getLast = function () {
-    return this.getTotalPages();
+Pagination.prototype.getSecondtHalf = function () {
+    var data = [];
+    var i = null;
+    var offset = this.getOffset();
+    var lastOffset = this.getTotalPages() - offset;
+    if (this.config.currentPage >= lastOffset) {
+        var start = this.config.currentPage;
+        var end = this.getTotalPages();
+    } else {
+        var start = this.config.currentPage + 1;
+        var end = start + this.getOffset();
+    }
+    var y = 0;
+    for (i = start; i < end; i++) {
+        data[y] = i;
+        y++;
+    }
+    return data;
+}
+//----------------------------------
+//----------------------------------
+Pagination.prototype.getRange = function () {
+    var range = this.getFirstHalf();
+    range.push(this.config.currentPage);
+    var second = this.getSecondtHalf();
+    var range = range.concat(second);
+    return range;
 }
 //----------------------------------
 Pagination.prototype.getGenerator = function () {
-    var result = {};
-    result.first = {
-        page: this.config.first,
-        label: this.config.firstLabel,
-        url: this.buildUrl(this.config.first)
-    }
-    if (this.getPrevious()) {
-        result.previous = {
+    var data = [];
+    var i = 0;
+    if (this.config.currentPage != 1) {
+        data[i++] = {
+            page: this.config.first,
+            label: this.config.firstLabel,
+            url: this.buildUrl(this.config.first)
+        }
+        data[i++] = {
             page: this.getPrevious(),
             label: this.config.previousLabel,
             url: this.buildUrl(this.getPrevious())
         }
     }
-    result.firstHalf = this.getFirstHalf();
-    result.middle = {
-        page: this.getMiddle(),
-        label: this.config.middleLabel,
-        url: this.buildUrl(this.getMiddle())
-    };
-    result.secondHalf = this.getSecondHalf();
-    if (this.getNext()) {
-        result.next = {
+    var range = this.getRange();
+    var len = range.length;
+    for (var y = 0; y < len; y++) {
+        data[i++] = {
+            page: range[y],
+            label: range[y],
+            url: this.buildUrl(range[y])
+        }
+    }
+    if (this.config.currentPage < this.getTotalPages()) {
+        data[i++] = {
             page: this.getNext(),
             label: this.config.nextLabel,
             url: this.buildUrl(this.getNext())
         }
+        data[i++] = {
+            page: this.getTotalPages(),
+            label: this.config.lastLabel,
+            url: this.buildUrl(this.getTotalPages())
+        }
     }
-    result.last = {
-        page: this.getLast(),
-        label: this.config.lastLabel,
-        url: this.buildUrl(this.getLast())
+    return data;
+}
+//----------------------------------
+Pagination.prototype.getTemplate = function () {
+    var template = this.config.template;
+    if (template == "bootstrap") {
+        var html = this.getTemplateBoostrap();
     }
-    return result;
+    return html;
+}
+//----------------------------------
+Pagination.prototype.getTemplateBoostrap = function () {
+    var generator = this.getGenerator();
+    var html = '<nav aria-label="Page navigation"><ul class="pagination">';
+    var range = this.getGenerator();
+    var len = range.length;
+    for (var y = 0; y < len; y++) {
+        var page = range[y];
+        console.log("page", page);
+        html += '<li><a href="' + page.url + '">' + page.label + '</a></li>';
+    }
+    html += '</ul></nav>';
+    return html;
 }
 //----------------------------------
 Pagination.prototype.buildUrl = function (page) {
@@ -168,45 +190,7 @@ Pagination.prototype.buildUrl = function (page) {
     return newUrl;
 }
 //----------------------------------
-Pagination.prototype.getTemplate = function () {
-    var template = this.config.template;
-    if (template == "bootstrap") {
-        var html = this.getTemplateBoostrap();
-    }
-    return html;
-}
 //----------------------------------
-Pagination.prototype.getTemplateBoostrap = function () {
-    var generator = this.getGenerator();
-    var html = '<nav aria-label="Page navigation"><ul class="pagination">';
-    if (generator.first) {
-        html += '<li><a href="' + generator.first.url + '">' + generator.first.label + '</a></li>';
-    }
-    if (generator.previous) {
-        html += '<li><a href="' + generator.previous.url + '">' + generator.previous.label + '</a></li>';
-    }
-    if (generator.firstHalf) {
-        generator.firstHalf.forEach(function (item) {
-            html += '<li><a href="' + item.url + '">' + item.page + '</a></li>';
-        })
-    }
-    if (generator.middle) {
-        html += '<li><a href="' + generator.middle.url + '">' + generator.middle.label + '</a></li>';
-    }
-    if (generator.secondHalf) {
-        generator.secondHalf.forEach(function (item) {
-            html += '<li><a href="' + item.url + '">' + item.page + '</a></li>';
-        })
-    }
-    if (generator.next) {
-        html += '<li><a href="' + generator.next.url + '">' + generator.next.label + '</a></li>';
-    }
-    if (generator.last) {
-        html += '<li><a href="' + generator.last.url + '">' + generator.last.label + '</a></li>';
-    }
-    html += '</ul></nav>';
-    console.log("html", html);
-    return html;
-}
+//----------------------------------
 //----------------------------------
 module.exports = Pagination;
