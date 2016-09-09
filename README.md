@@ -83,7 +83,7 @@ In a real world, you would like to generate pagination url with other parameters
  Output url = example.com/users?filter=name&page=1
  ```
  
- ## Available Configurations
+## Available Configurations
  ```javascript
   var config = {
         totalRecords    :   10, //total number of records
