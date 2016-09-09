@@ -5,11 +5,11 @@ function Pagination(config) {
     //optional
     this.config.template = config.template || 'bootstrap';
     this.config.pageParameter = config.pageParameter || 'page';
+    this.config.currentUrl = config.currentUrl || '';
     this.config.first = isUndefined(config.first) ? 1 : config.first;
     this.config.displayPages = config.displayPages || 10;
     this.config.firstLabel = config.firstLabel || '«';
     this.config.previousLabel = config.previousLabel || '‹';
-    this.config.middleLabel = config.middleLabel || '...';
     this.config.nextLabel = config.nextLabel || '›';
     this.config.lastLabel = config.lastLabel || '»';
     this.offset = this.getOffset();
@@ -65,19 +65,19 @@ Pagination.prototype.getNext = function () {
     }
     return data;
 }
-//----------------------------------
-Pagination.prototype.getMiddle = function () {
-    return Math.floor(this.getTotalPages() / 2);
-}
+
 //----------------------------------
 Pagination.prototype.buildUrl = function (page) {
-    var currentUrl = this.config.url;
+    var currentUrl = this.config.currentUrl;
     var currentUrlPageString = this.config.pageParameter + "=" + this.config.currentPage;
     var newPageString = this.config.pageParameter + "=" + page;
-    if (currentUrl.indexOf(currentUrlPageString) > -1) {
-        var newUrl = currentUrl.replace(currentUrlPageString, newPageString);
-    } else {
-        var newUrl = currentUrl + "?" + newPageString;
+    var newUrl = currentUrl + "?" + newPageString;
+    if (currentUrl != "") {
+        if (currentUrl.indexOf(currentUrlPageString) > -1) {
+            var newUrl = currentUrl.replace(currentUrlPageString, newPageString);
+        } else {
+            var newUrl = currentUrl + "&" + newPageString;
+        }
     }
     return newUrl;
 }
@@ -85,7 +85,7 @@ Pagination.prototype.buildUrl = function (page) {
 Pagination.prototype.getRange = function () {
     var data = [];
     var start = 1;
-    var end = 1 + this.config.displayPages;
+    var end = this.config.displayPages;
     if (this.getTotalPages() < this.config.displayPages) {
         end = this.getTotalPages();
     }
@@ -95,9 +95,10 @@ Pagination.prototype.getRange = function () {
         end = start + this.config.displayPages;
     }
     //if page is greater then offset and less then total pages minum offset
-    if (this.config.currentPage > (this.getTotalPages() - this.getOffset())) {
+    var endStart = this.getTotalPages() - this.config.displayPages;
+    if (endStart > 0 && this.config.currentPage > endStart) {
         start = this.getTotalPages() - this.config.displayPages;
-        end = this.getTotalPages() + 1;
+        end = this.getTotalPages();
     }
     var i = 0;
     if (this.config.currentPage != 1) {
@@ -112,7 +113,7 @@ Pagination.prototype.getRange = function () {
             url: this.buildUrl(this.getPrevious())
         }
     }
-    for (var y = start; y < end; y++) {
+    for (var y = start; y < end + 1; y++) {
         if (this.config.currentPage == y) {
             data[i] = {
                 page: y,
